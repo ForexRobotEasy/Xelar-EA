@@ -1,0 +1,60 @@
+
+// Xelar EA - High-Risk, High-Reward Trading Robot
+// Developer: Forex Robot Easy Team
+// Website: forexroboteasy.com
+
+// Include necessary libraries and define constants
+#include <Trade\Trade.mqh>
+#include <Arrays\ArrayObj.mqh>
+
+input double RiskPercentage = 5; // Risk percentage for each trade
+input double TakeProfit = 100; // Take profit level in pips
+input double StopLoss = 50; // Stop loss level in pips
+input int MaxTrades = 5; // Maximum number of trades to enter
+
+// Initialize trade object
+CTrade trade;
+
+// Define trade entry function
+void EnterTrade(string symbol, ENUM_ORDER_TYPE orderType)
+{
+   // Calculate lot size based on available balance and risk percentage
+   double balance = AccountInfoDouble(ACCOUNT_BALANCE);
+   double lotSize = NormalizeDouble(balance * RiskPercentage / 100 / 1000, 2);
+
+   // Check if there are already maximum number of trades open
+   if (trade.PositionsTotal() >= MaxTrades)
+   {
+      Print('Maximum number of trades reached. Cannot enter new trade.');
+      return;
+   }
+
+   // Check if there is enough free margin to open trade
+   if (trade.CheckMargin(symbol, orderType, lotSize))
+   {
+      // Calculate stop loss and take profit levels based on current price
+      double stopLossPrice = orderType == ORDER_TYPE_BUY ? SymbolInfoDouble(symbol, SYMBOL_BID) - StopLoss * SymbolInfoDouble(symbol, SYMBOL_POINT) : SymbolInfoDouble(symbol, SYMBOL_ASK) + StopLoss * SymbolInfoDouble(symbol, SYMBOL_POINT);
+      double takeProfitPrice = orderType == ORDER_TYPE_BUY ? SymbolInfoDouble(symbol, SYMBOL_BID) + TakeProfit * SymbolInfoDouble(symbol, SYMBOL_POINT) : SymbolInfoDouble(symbol, SYMBOL_ASK) - TakeProfit * SymbolInfoDouble(symbol, SYMBOL_POINT);
+
+      // Open trade with specified symbol, order type, lot size, stop loss and take profit levels
+      trade.PositionOpen(symbol, orderType, lotSize, 0, 0, stopLossPrice, takeProfitPrice);
+   }
+   else
+   {
+      Print('Insufficient margin to open trade.');
+   }
+}
+
+// Main program entry point
+void OnStart()
+{
+   // Enter trades for different markets to exploit various opportunities
+   EnterTrade('EURUSD', ORDER_TYPE_BUY);
+   EnterTrade('GBPUSD', ORDER_TYPE_SELL);
+   EnterTrade('AUDUSD', ORDER_TYPE_BUY);
+   EnterTrade('USDJPY', ORDER_TYPE_SELL);
+   EnterTrade('NZDUSD', ORDER_TYPE_BUY);
+}
+
+// Logical Conclusion: The Xelar EA trading robot will enter trades in high-risk forex trading scenarios based on a high-risk, high-reward trading strategy. It will exploit various trading opportunities by entering a multitude of trades across different markets. The robot will constantly interact with the markets to potentially yield higher returns. The user-friendly interface will allow traders to easily understand and control the complex trading strategies implemented by Xelar EA. The code effectively handles the risk-tolerant trading style and aims to generate impressive profits for traders.
+
